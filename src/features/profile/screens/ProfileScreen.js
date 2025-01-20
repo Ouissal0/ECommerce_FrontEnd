@@ -11,6 +11,7 @@ import {
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+const { ipAddress } = require("../../../config");
 
 const ProfileScreen = () => {
   const [userInfo, setUserInfo] = useState(null); // État pour les infos utilisateur
@@ -27,7 +28,7 @@ const ProfileScreen = () => {
           return;
         }
 
-        const endpoint = `http://192.168.27.154:5000/api/Authentication/user/${username}`;
+        const endpoint = `http://${ipAddress}:5001/api/Authentication/user/${username}`;
         const response = await fetch(endpoint, {
           method: "GET",
           headers: {

@@ -11,6 +11,7 @@ import {
 import MapView, { Marker, Callout } from "react-native-maps";
 import * as Location from "expo-location";
 import { useNavigation } from "@react-navigation/native";
+const { ipAddress } = require("../../../config");
 
 const { width } = Dimensions.get("window");
 
@@ -73,7 +74,7 @@ const MapScreen = () => {
         });
 
         // Fetch markets from the API
-        const response = await fetch("http://192.168.27.154:5003/api/Markets");
+        const response = await fetch(`http://${ipAddress}:5001/api/Markets`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }

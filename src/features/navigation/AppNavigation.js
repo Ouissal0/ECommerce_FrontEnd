@@ -27,7 +27,7 @@ export default function AppNavigation() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="AccountSuccess" component={AccountSuccessScreen} />
-        <Stack.Screen name="BottomNavigationBar" component={BottomNavigationBar} />
+        <Stack.Screen name="BottomNavigationBar" component={BottomNavigationBar} options={{gestureEnabled: false,}}/>
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Market" component={MarketScreen} />
         <Stack.Screen name="MarketSuccess" component={MarketSuccessScreen} />

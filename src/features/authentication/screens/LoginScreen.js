@@ -6,15 +6,15 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+const { ipAddress } = require("../../../config");
 
 const LoginScreen = () => {
   const navigation = useNavigation();
 
-  // States
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [secureTextEntry, setSecureTextEntry] = useState(true);
@@ -25,15 +25,13 @@ const LoginScreen = () => {
 
   const handleSignIn = async () => {
     console.log("Sign In clicked with username:", username);
-  
+
     const payload = {
       userName: username,
       password: password,
     };
-  
+    const endpoint = `http://${ipAddress}:5001/api/Authentication/login`;
     try {
-      const endpoint = "http://192.168.27.154:5000/api/Authentication/login";
-  
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -41,23 +39,24 @@ const LoginScreen = () => {
         },
         body: JSON.stringify(payload),
       });
-  
-      const result = await response.json();
-  
       if (response.ok) {
+        const result = await response.json();
         console.log("Login successful:", result);
-  
-        // Sauvegarder le username dans AsyncStorage
+
         await AsyncStorage.setItem("username", username);
-  
-        navigation.navigate("BottomNavigationBar"); 
+
+        navigation.navigate("BottomNavigationBar");
       } else {
-        console.error("Login failed:", result.message);
-        alert(`Login failed: ${result.message}`);
+        const errorData = await response.json();
+        console.error("Login failed:", errorData.message);
+        Alert.alert(
+          "Login Failed",
+          errorData.message || "An error occurred during login."
+        );
       }
     } catch (error) {
       console.error("Error during login:", error);
-      alert("An error occurred during login. Please try again.");
+      Alert.alert("Error", "An error occurred during login. Please try again.");
     }
   };
 
@@ -67,7 +66,6 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Top Image */}
       <View style={styles.topContainer}>
         <Image
           source={require("../../../../assets/logos/dealsquare.png")}
@@ -76,29 +74,26 @@ const LoginScreen = () => {
         />
       </View>
       <View style={styles.textContainer}>
-      <Text style={styles.title}>Welcome Back !</Text>
-      <Text style={styles.subTitle}>Sign in to continue</Text>
+        <Text style={styles.title}>Welcome Back !</Text>
+        <Text style={styles.subTitle}>Sign in to continue</Text>
       </View>
 
-      {/* Login Form */}
       <View style={styles.formContainer}>
-        {/* Username Input */}
         <TextInput
           style={styles.input}
           placeholder="Username"
           placeholderTextColor="#888"
-          value={username} // Utilisation de la variable d'état username
-          onChangeText={setUsername} // Met à jour username
+          value={username}
+          onChangeText={setUsername}
         />
 
-        {/* Password Input */}
         <TextInput
           style={styles.input}
           placeholder="Password"
           placeholderTextColor="#888"
           secureTextEntry={secureTextEntry}
-          value={password} // Utilisation de la variable d'état password
-          onChangeText={setPassword} // Met à jour password
+          value={password}
+          onChangeText={setPassword}
         />
         <TouchableOpacity
           onPress={togglePasswordVisibility}
@@ -109,12 +104,10 @@ const LoginScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* Sign In Button */}
         <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
           <Text style={styles.signInText}>Sign In</Text>
         </TouchableOpacity>
 
-        {/* Create Account Button */}
         <TouchableOpacity
           style={styles.createAccountButton}
           onPress={handleCreateAccount}
@@ -129,7 +122,7 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#E0F7FA", 
+    backgroundColor: "#E0F7FA",
   },
   topContainer: {
     height: "30%",
@@ -137,32 +130,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   textContainer: {
-    marginBottom: 20, 
+    marginBottom: 20,
     marginTop: -50,
     justifyContent: "center",
     alignItems: "center",
   },
   title: {
-    fontSize: 24, 
-    fontWeight: "bold", 
-    color: "#333", 
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 10,
-    textAlign: "center", 
+    textAlign: "center",
   },
   subTitle: {
-    fontSize: 15, 
-    color: "#333", 
+    fontSize: 15,
+    color: "#333",
     marginBottom: 10,
-    textAlign: "center", 
+    textAlign: "center",
   },
-  
   logo: {
-    width: "70%", // Adjust logo width
-    height: "30%", // Adjust logo height
+    width: "70%",
+    height: "30%",
   },
   formContainer: {
     height: "65%",
-    width: "90%", // Specific width for the form
+    width: "90%",
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,

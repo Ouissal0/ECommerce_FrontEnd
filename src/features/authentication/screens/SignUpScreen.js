@@ -13,6 +13,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { validateSignUpForm } from "../../../../utils/formatters";
+const { ipAddress } = require("../../../config");
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
@@ -88,9 +89,8 @@ const SignUpScreen = () => {
         image: values.profileImage,
         role: values.role || "CLIENT", 
       };
+      const endpoint = `http://${ipAddress}:5001/api/Authentication/register`;
       try {
-        const endpoint = "http://192.168.27.154:5000/api/Authentication/register"; 
-  
         // Envoi de la requête POST avec fetch
         const response = await fetch(endpoint, {
           method: "POST",
@@ -98,14 +98,13 @@ const SignUpScreen = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload), // Convertit l'objet en JSON
-        });
-  
-        const result = await response.json();
-  
+        });  
         if (response.ok) {
+          const result = await response.json();
           console.log("Account successfully created:", result);
           navigation.navigate("AccountSuccess"); 
         } else {
+          const result = await response.json();
           console.error("Failed to create account:", result.message);
           alert(`Failed to create account: ${result.message}`);
         }

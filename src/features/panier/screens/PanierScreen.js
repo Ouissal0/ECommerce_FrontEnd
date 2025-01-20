@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,58 +7,63 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
-} from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+} from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 
 const PanierScreen = ({ navigation }) => {
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
-      name: 'Hydrating Mask',
-      volume: 'Volume 85ml',
+      name: "Hydrating Mask",
+      volume: "Volume 85ml",
       price: 28,
       quantity: 1,
-      image: 'https://via.placeholder.com/100',
+      image: "https://via.placeholder.com/100",
     },
     {
       id: 2,
-      name: 'Lip Balm',
-      volume: 'Volume 3.50ml',
+      name: "Lip Balm",
+      volume: "Volume 3.50ml",
       price: 8,
       quantity: 1,
-      image: 'https://via.placeholder.com/100',
+      image: "https://via.placeholder.com/100",
     },
     {
       id: 3,
-      name: 'Floral Water',
-      volume: 'Volume 30ml',
+      name: "Floral Water",
+      volume: "Volume 30ml",
       price: 12,
       quantity: 1,
-      image: 'https://via.placeholder.com/100',
+      image: "https://via.placeholder.com/100",
     },
   ]);
 
-  const deliveryFee = 5.50;
+  const deliveryFee = 5.5;
 
   const updateQuantity = (id, increment) => {
-    setCartItems(cartItems.map(item => {
-      if (item.id === id) {
-        const newQuantity = item.quantity + increment;
-        return {
-          ...item,
-          quantity: newQuantity > 0 ? newQuantity : 1,
-        };
-      }
-      return item;
-    }));
+    setCartItems(
+      cartItems.map((item) => {
+        if (item.id === id) {
+          const newQuantity = item.quantity + increment;
+          return {
+            ...item,
+            quantity: newQuantity > 0 ? newQuantity : 1,
+          };
+        }
+        return item;
+      })
+    );
   };
 
   const removeItem = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+    setCartItems(cartItems.filter((item) => item.id !== id));
   };
 
   const calculateSubtotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
   };
 
   const calculateTotal = () => {
@@ -68,8 +73,8 @@ const PanierScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity 
-          onPress={() => navigation.navigate("Home")}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("BottomNavigationBar")}
           style={styles.backButton}
         >
           <AntDesign name="left" size={24} color="white" />
@@ -80,10 +85,7 @@ const PanierScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.cartContent}>
         {cartItems.map((item) => (
           <View key={item.id} style={styles.cartItem}>
-            <Image
-              source={{ uri: item.image }}
-              style={styles.productImage}
-            />
+            <Image source={{ uri: item.image }} style={styles.productImage} />
             <View style={styles.productDetails}>
               <Text style={styles.productName}>{item.name}</Text>
               <Text style={styles.productVolume}>{item.volume}</Text>
@@ -122,7 +124,9 @@ const PanierScreen = ({ navigation }) => {
           <Text style={styles.invoiceTitle}>Invoice</Text>
           <View style={styles.invoiceRow}>
             <Text style={styles.invoiceLabel}>Cart Total</Text>
-            <Text style={styles.invoiceValue}>{calculateSubtotal().toFixed(2)} €</Text>
+            <Text style={styles.invoiceValue}>
+              {calculateSubtotal().toFixed(2)} €
+            </Text>
           </View>
           <View style={styles.invoiceRow}>
             <Text style={styles.invoiceLabel}>Delivery Fee</Text>
@@ -130,16 +134,18 @@ const PanierScreen = ({ navigation }) => {
           </View>
           <View style={[styles.invoiceRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>{calculateTotal().toFixed(2)} €</Text>
+            <Text style={styles.totalValue}>
+              {calculateTotal().toFixed(2)} €
+            </Text>
           </View>
         </View>
       </ScrollView>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.confirmButton}
         onPress={() => {
           // Handle order confirmation
-          console.log('Order confirmed');
+          console.log("Order confirmed");
         }}
       >
         <Text style={styles.confirmButtonText}>Confirm Order</Text>
@@ -151,13 +157,13 @@ const PanierScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: "#F8F8F8",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: '#008080',
+    backgroundColor: "#008080",
   },
   backButton: {
     padding: 8,
@@ -165,21 +171,21 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: 'white',
+    fontWeight: "600",
+    textAlign: "center",
+    color: "white",
   },
   cartContent: {
     paddingHorizontal: 16,
     paddingTop: 8,
   },
   cartItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    backgroundColor: "#fff",
     marginBottom: 16,
     borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -192,38 +198,38 @@ const styles = StyleSheet.create({
   productDetails: {
     flex: 1,
     padding: 12,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   productName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
-    color: '#333',
+    color: "#333",
   },
   productVolume: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 4,
   },
   price: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#008080',
+    fontWeight: "600",
+    color: "#008080",
   },
   subtotal: {
     fontSize: 14,
-    color: '#555',
+    color: "#555",
     marginTop: 4,
   },
   productActions: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 8,
   },
   quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E0F7F7',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E0F7F7",
     borderRadius: 20,
     padding: 4,
   },
@@ -231,29 +237,29 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#008080',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#008080",
+    justifyContent: "center",
+    alignItems: "center",
     marginHorizontal: 4,
   },
   quantityButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
+    fontWeight: "600",
+    color: "white",
   },
   quantity: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginHorizontal: 8,
   },
   removeButton: {
     marginTop: 8,
   },
   invoice: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     borderRadius: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -262,50 +268,50 @@ const styles = StyleSheet.create({
   },
   invoiceTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 16,
-    color: '#008080',
+    color: "#008080",
   },
   invoiceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
   invoiceLabel: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   invoiceValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   totalRow: {
     marginTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
+    borderTopColor: "#EEEEEE",
     paddingTop: 8,
   },
   totalLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   totalValue: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#008080',
+    fontWeight: "600",
+    color: "#008080",
   },
   confirmButton: {
-    backgroundColor: '#008080',
+    backgroundColor: "#008080",
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 16,
     marginBottom: 50,
   },
   confirmButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
 

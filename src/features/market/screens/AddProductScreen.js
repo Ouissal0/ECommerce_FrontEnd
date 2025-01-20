@@ -1,90 +1,134 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  Image,
-} from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import DropDownPicker from "react-native-dropdown-picker";
+import React, { useState, useEffect } from "react"
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, Image } from "react-native"
+import * as ImagePicker from "expo-image-picker"
+import DropDownPicker from "react-native-dropdown-picker"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+const { ipAddress } = require("../../../config")
 
 const AddProductScreen = ({ navigation }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [image, setImage] = useState(null);
-  const [category, setCategory] = useState(null);
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+  const [price, setPrice] = useState("")
+  const [stockQuantity, setQuantity] = useState("")
+  const [image, setImage] = useState(null)
+  const [category, setCategory] = useState(null)
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
+  const [categories, setCategories] = useState([])
 
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const [categories, setCategories] = useState([
-    { label: "Food", value: "food" },
-    { label: "Personal Care", value: "personal_care" },
-    { label: "Electronics", value: "electronics" },
-    { label: "Clothing", value: "clothing" },
-    { label: "Furniture", value: "furniture" },
-    { label: "Sports", value: "sports" },
-    { label: "Toys", value: "toys" },
-  ]);
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`http://${ipAddress}:5001/api/Categories`)
+      const data = await response.json()
+      setCategories(data.map((item) => ({ label: item.name, value: item.id })))
+    } catch (error) {
+      console.error("Error fetching categories:", error)
+      Alert.alert("Error", "Failed to fetch categories. Please try again.")
+    }
+  }
 
   const handlePickImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (!permissionResult.granted) {
-      Alert.alert("Permission Denied", "You need to allow access to your gallery!");
-      return;
+      Alert.alert("Permission Denied", "You need to allow access to your gallery!")
+      return
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
-    });
+    })
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri); // Use the selected image URI
+      setImage(result.assets[0].uri)
     }
-  };
+  }
 
-  const handleAddProduct = () => {
-    if (!name || !description || !price || !quantity || !image || !category) {
-      Alert.alert("Error", "Please fill all fields!");
-      return;
+  const handleAddProduct = async () => {
+    if (!name || !description || !price || !stockQuantity || !image || !category) {
+      Alert.alert("Error", "Please fill all fields!")
+      return
     }
 
-    Alert.alert("Success", `${name} has been added successfully!`);
-    navigation.goBack(); // Navigate back after adding the product
-  };
+    try {
+      const ownerName = await AsyncStorage.getItem("username")
+      if (!ownerName) {
+        console.error("Username not found in AsyncStorage")
+        Alert.alert("Error", "User information not found. Please log in again.")
+        return
+      }
+
+      // Get Market ID by owner name
+      const marketIdResponse = await fetch(`http://${ipAddress}:5001/api/Markets/Owner/${ownerName}`)
+      if (!marketIdResponse.ok) {
+        Alert.alert("Error", "Failed to get market ID. Please try again.")
+        return
+      }
+
+      const marketIdData = await marketIdResponse.json()
+      const marketId = marketIdData.marketId
+
+      if (isNaN(marketId)) {
+        console.error("Invalid Market ID")
+        Alert.alert("Error", "Invalid market information. Please try again.")
+        return
+      }
+
+      // Prepare product data
+      const productData = {
+        name,
+        description,
+        price: Number.parseFloat(price),
+        stockQuantity: Number.parseInt(stockQuantity),
+        image,
+        categoryId: category,
+        marketId,
+      }
+
+      // Add the product
+      const addProductResponse = await fetch(`http://${ipAddress}:5001/api/Products`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productData),
+      })
+
+      if (addProductResponse.ok) {
+        const responseText = await addProductResponse.text()
+        if (responseText) {
+          const addProductData = JSON.parse(responseText)
+          console.log(addProductData)
+          Alert.alert("Success", `${name} has been added successfully!`)
+          navigation.goBack()
+        } else {
+          Alert.alert("Error", "Empty response from the server.")
+        }
+      } else {
+        Alert.alert("Error", "There was an issue adding the product.")
+      }
+    } catch (error) {
+      console.error("Error adding product:", error)
+      Alert.alert("Error", "An error occurred while adding the product.")
+    }
+  }
 
   return (
     <ScrollView style={styles.container}>
-     {/* Header */}
-     <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backArrow}
-        >
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backArrow}>
           <Text style={styles.backArrowText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Add New Product</Text>
       </View>
 
-      {/* Name Input */}
       <Text style={styles.label}>Product Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter product name"
-        value={name}
-        onChangeText={setName}
-      />
+      <TextInput style={styles.input} placeholder="Enter product name" value={name} onChangeText={setName} />
 
-      {/* Description Input */}
       <Text style={styles.label}>Description</Text>
       <TextInput
         style={[styles.input, styles.textArea]}
@@ -94,7 +138,6 @@ const AddProductScreen = ({ navigation }) => {
         multiline
       />
 
-      {/* Price Input */}
       <Text style={styles.label}>Price ($)</Text>
       <TextInput
         style={styles.input}
@@ -104,17 +147,15 @@ const AddProductScreen = ({ navigation }) => {
         keyboardType="numeric"
       />
 
-      {/* Quantity Input */}
       <Text style={styles.label}>Quantity in Stock</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter quantity"
-        value={quantity}
+        value={stockQuantity}
         onChangeText={setQuantity}
         keyboardType="numeric"
       />
 
-      {/* Category Dropdown */}
       <Text style={styles.label}>Category</Text>
       <DropDownPicker
         open={categoriesOpen}
@@ -128,7 +169,6 @@ const AddProductScreen = ({ navigation }) => {
         dropDownContainerStyle={styles.dropdownContainer}
       />
 
-      {/* Image Picker */}
       <Text style={styles.label}>Product Image</Text>
       <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
         {image ? (
@@ -138,13 +178,12 @@ const AddProductScreen = ({ navigation }) => {
         )}
       </TouchableOpacity>
 
-      {/* Add Product Button */}
       <TouchableOpacity style={styles.addButton} onPress={handleAddProduct}>
         <Text style={styles.addButtonText}>Add Product</Text>
       </TouchableOpacity>
     </ScrollView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -163,7 +202,7 @@ const styles = StyleSheet.create({
     color: "#00796B", // Teal color
     textAlign: "center",
     marginTop: 35,
-    marginLeft : 30,
+    marginLeft: 30,
   },
   label: {
     fontSize: 16,
@@ -235,6 +274,7 @@ const styles = StyleSheet.create({
     color: "#00796B",
     fontWeight: "bold",
   },
-});
+})
 
-export default AddProductScreen;
+export default AddProductScreen
+
